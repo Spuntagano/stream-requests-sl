@@ -1,0 +1,36 @@
+{
+  "name": "Stream Requests",
+  "version": "0.0.1",
+  "buildPath": "dist/",
+  "permissions": ["slobs.scenes-sources", "slobs.obs-settings"],
+  "sources": [
+    {
+      "type": "browser_source",
+      "name": "Example Widget",
+      "id": "streamlabs_example_widget",
+      "about": {
+        "description": "This widget will play a cool animation when a button is clicked",
+        "bullets": [
+          "Plays cool animations"
+        ],
+        "bannerImage": "colbert.gif"
+      },
+      "file": "widget.html",
+      "initialSize": {
+        "type": "relative",
+        "width": 1,
+        "height": 1
+      }
+    }
+  ],
+  "pages": [
+    {
+      "slot": "top_nav",
+      "file": "setting.html",
+      "popOutSize": {
+        "width": 300,
+        "height": 500
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+@import '../../sass/global';
+
+.live-config {
+  color: $dark-border-color;
+}
+
+.dark-theme {
+  .live-config-page {
+    color: $light-text;
+    background-color: $dark-background;
+    border: 1px solid $dark-border-color;
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "accessKeyId": "",
+  "secretAccessKey": "",
+  "bucketName": "stream-requests-purchase",
+  "bucketNameStaging": "stream-requests-purchase-staging",
+  "endpoint": "s3.us-west-2.amazonaws.com"
+}
