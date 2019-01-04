@@ -1,18 +1,17 @@
 import * as React from 'react'
-import Requests from '../types/Requests';
+import Request from '../types/Request';
 import Settings from '../types/Settings';
 import Toast from '../lib/Toast/Toast';
 import Configs from '../types/Configs';
 import Loading from './Loading/Loading';
 import {ReactElement} from 'react';
 import configs from '../../configs';
-import Streamlabs from '../types/Streamlabs';
+import Authentication from '../lib/Authentication/Authentication';
 
 type State = {
     configured: boolean,
-    requests: Requests,
+    requests: Array<Request>,
     settings: Settings,
-    streamlabs: Streamlabs
     configs: Configs
 }
 
@@ -22,36 +21,58 @@ type Props = {
 }
 
 export default class App extends React.Component {
-    public twitch: any;
     public state: State;
     public props: Props;
     public toast: Toast;
+    public authentication: Authentication;
 
     constructor(props: Props) {
         super(props);
 
         const url = new URL(window.location.href);
-        const state = url.searchParams.get('state');
+        const state = url.searchParams.get('state') || 'released';
+        this.authentication = new Authentication();
 
         this.toast = new Toast();
         this.state = {
             configured: false,
-            requests: {},
+            requests: [],
             settings: {},
-            streamlabs: {},
             configs: configs[state],
         }
     }
 
     componentDidMount() {
         // @ts-ignore
-        window.Streamlabs.init().then(streamlabs => {
-            this.setState(() => {
-                return {
-                    streamlabs,
-                    configured: true
+        window.Streamlabs.init().then(async streamlabs => {
+            if (!this.state.configured) {
+                this.authentication.setToken(streamlabs);
+
+                try {
+                    let promises: any = await Promise.all([
+                        this.authentication.makeCall(`${this.state.configs.relayURL}/request/${streamlabs.profiles.streamlabs.id}`),
+                        this.authentication.makeCall(`${this.state.configs.relayURL}/setting/${streamlabs.profiles.streamlabs.id}`)
+                    ]);
+
+                    let requests = (await promises[0].json()).requests;
+                    let settings = (await promises[1].json()).settings;
+
+                    requests.push({title: '', description: '', price: '', active: false});
+
+                    this.setState(() => {
+                        return {
+                            requests,
+                            settings,
+                            configured: true
+                        }
+                    });
+                } catch (e) {
+                    this.toast.show({
+                        html: '<i class="material-icons">done</i>Error loading requests',
+                        classes: 'error'
+                    });
                 }
-            });
+            }
         });
     }
 
@@ -63,12 +84,12 @@ export default class App extends React.Component {
                 requests: this.state.requests,
                 settings: this.state.settings,
                 configs: this.state.configs,
-                streamlabs: this.state.streamlabs,
+                authentication: this.authentication,
             });
         });
 
         return (
-            <div className="app">
+            <div className="app dark-theme">
                 {this.state.configured && childrens}
                 {(showLoading && !this.state.configured) && <Loading />}
             </div>

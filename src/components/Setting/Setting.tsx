@@ -1,27 +1,28 @@
 import * as React from 'react'
 import {ChangeEvent, MouseEvent} from 'react';
 import Toast from '../../lib/Toast/Toast';
-import Requests from '../../types/Requests';
+import Request from '../../types/Request';
 import Configs from '../../types/Configs';
 import Settings from '../../types/Settings';
 import RequestReceived from '../../types/RequestReceived';
 import InputField from '../InputField/InputField';
 import Switch from '../Switch/Switch';
-import Request from '../../types/Request';
 import Textarea from '../Textarea/Textarea';
+import Authentication from '../../lib/Authentication/Authentication';
 import Collapsible from '../Collapsible/Collapsible';
 import CollapsibleItem from '../Collapsible/CollapsibleItem/CollapsibleItem';
 import './Setting.scss'
 
 type State = {
-    requests: Requests,
+    requests: Array<Request>,
     settings: Settings,
 }
 
 type Props = {
-    requests?: Requests,
+    requests?: Array<Request>,
     settings?: Settings,
     configs?: Configs,
+    authentication?: Authentication
 };
 
 export default class Setting extends React.Component {
@@ -29,9 +30,10 @@ export default class Setting extends React.Component {
     public twitch: any;
     public onUpdateConfiguration: () => (e: MouseEvent<HTMLButtonElement>) => void;
     public onUpdateSettings: (update: string) => (e: ChangeEvent<HTMLInputElement>) => void;
-    public onToggleActive: (index: number, price: string) => (e: ChangeEvent<HTMLInputElement>) => void;
-    public onRequestChange: (index: number, price: string, update: string) => (e: ChangeEvent<HTMLInputElement>|ChangeEvent<HTMLTextAreaElement>) => void;
-    public onDeleteRequest: (index: number, price: string) => (e: MouseEvent<HTMLButtonElement>) => void;
+    public onToggleActive: (index: number) => (e: ChangeEvent<HTMLInputElement>) => void;
+    public onRequestChange: (index: number, update: string) => (e: ChangeEvent<HTMLInputElement>|ChangeEvent<HTMLTextAreaElement>) => void;
+    public onPaypalEmailChange: () => (e: ChangeEvent<HTMLInputElement>) => void;
+    public onDeleteRequest: (index: number) => (e: MouseEvent<HTMLButtonElement>) => void;
     public onTestNotifier: () => (e: MouseEvent<HTMLButtonElement>) => void;
     public onCopyNotificationBoxUrl: () => (e: MouseEvent<HTMLAnchorElement>) => void;
     public onOpenStart: () => () => void;
@@ -59,56 +61,69 @@ export default class Setting extends React.Component {
 
         this.onUpdateConfiguration = () => () => this.updateConfiguration();
         this.onUpdateSettings = (update: string) => (e: ChangeEvent<HTMLInputElement>) => this.updateSettings(e, update);
-        this.onToggleActive = (index: number, price: string) => (e: ChangeEvent<HTMLInputElement>) => this.toggleActive(e, index, price);
-        this.onRequestChange = (index: number, price: string, update: string) => (e: ChangeEvent<HTMLInputElement>) => this.requestChange(e, index, price, update);
-        this.onDeleteRequest = (index: number, price: string) => (e: MouseEvent<HTMLButtonElement>) => this.deleteRequest(e, index, price);
+        this.onToggleActive = (index: number) => (e: ChangeEvent<HTMLInputElement>) => this.toggleActive(e, index);
+        this.onRequestChange = (index: number, update: string) => (e: ChangeEvent<HTMLInputElement>) => this.requestChange(e, index, update);
+        this.onPaypalEmailChange = () => (e: ChangeEvent<HTMLInputElement>) => this.paypalEmailChange(e);
+        this.onDeleteRequest = (index: number,) => (e: MouseEvent<HTMLButtonElement>) => this.deleteRequest(e, index);
         this.onTestNotifier = () => () => this.testNotifier();
         this.onCopyNotificationBoxUrl = () => () => this.copyNotificationBoxUrl();
         this.onOpenStart = () => () => this.openStart();
     }
 
-    requestChange(e: ChangeEvent<HTMLInputElement>, index: number, price: string, update: string) {
+    requestChange(e: ChangeEvent<HTMLInputElement>, index: number, update: string) {
         const value = e.target.value;
 
         this.setState((prevState: State) => {
-            let newRequests: Requests = Object.assign({}, prevState.requests);
-            if (newRequests[price][newRequests[price].length-1][update].length) {
-                newRequests[price].push({title: '', description: '', active: false});
+            let newRequests: Array<Request> = [...prevState.requests];
+            if (newRequests[newRequests.length-1][update].length) {
+                newRequests.push({title: '', description: '', active: false, price: 0});
             }
 
-            if (!newRequests[price][index].description.length && !newRequests[price][index].title.length && value.length) {
-                newRequests[price][index].active = true;
+            if (!newRequests[index].description.length && !newRequests[index].title.length && value.length) {
+                newRequests[index].active = true;
             }
 
-            if (update === 'title' && !newRequests[price][index].description.length && !value.length) {
-                newRequests[price][index].active = false;
+            if (update === 'title' && !newRequests[index].description.length && !value.length) {
+                newRequests[index].active = false;
             }
 
-            if (update === 'description' && !newRequests[price][index].title.length && !value.length) {
-                newRequests[price][index].active = false;
+            if (update === 'description' && !newRequests[index].title.length && !value.length) {
+                newRequests[index].active = false;
             }
 
-            newRequests[price][index][update] = value;
+            newRequests[index][update] = value;
             return {requests: newRequests};
         });
     }
 
-    async updateConfiguration() {
-        const {configs} = this.props;
+    paypalEmailChange(e: ChangeEvent<HTMLInputElement>) {
+        const value = e.target.value;
 
-        let requests: Requests = {};
-        Object.keys(this.state.requests).forEach((price) => {
-            requests[price] = this.state.requests[price].filter((request) => {
+        this.setState((prevState: State) => {
+            let newSettings: Settings = Object.assign({}, prevState.settings);
+            newSettings.paypalEmail = value;
+
+            return {settings: newSettings};
+        });
+    }
+
+    async updateConfiguration() {
+        const {configs, authentication} = this.props;
+
+        let requests: Array<Request> = [];
+        this.state.requests.forEach(() => {
+            requests = this.state.requests.filter((request) => {
                 return !!(request.title.length || request.description.length);
             });
         });
 
-        try {
-            //TODO send stuff
-            await Promise.all([
-            ]);
+        const displayName = authentication.getStreamlabs().profiles.streamlabs.name;
 
-            this.twitch.send('broadcast', 'application/json', {requests, settings: this.state.settings});
+        try {
+            await Promise.all([
+                authentication.makeCall(`${configs.relayURL}/request`, 'POST', {requests, displayName}),
+                authentication.makeCall(`${configs.relayURL}/setting`, 'POST', {settings: this.state.settings, displayName})
+            ]);
 
             this.toast.show({html: '<i class="material-icons">done</i>Configurations saved!', classes: 'success'});
         } catch(e) {
@@ -126,49 +141,31 @@ export default class Setting extends React.Component {
         });
     }
 
-    deleteRequest(e: MouseEvent<HTMLButtonElement>, index: number, price: string) {
+    deleteRequest(e: MouseEvent<HTMLButtonElement>, index: number) {
         this.setState((prevState: State) => {
-            let newRequests: Requests = Object.assign({}, prevState.requests);
-
-            if (newRequests[price].length-1 === index) {
-                newRequests[price][index] = {title: '', description: '', active: false};
-            } else {
-                newRequests[price].splice(index, 1);
-            }
+            let newRequests: Array<Request> = [...prevState.requests];
+            newRequests.splice(index, 1);
 
             return {requests: newRequests};
         });
     }
 
     testNotifier() {
-        const {configs} = this.props;
+        const {authentication, configs} = this.props;
 
         let requestReceived: RequestReceived = {
-            request: {
-                title: 'test request',
-                description: 'request description',
-                active: true
-            },
             transaction: {
+                title: 'test request',
                 displayName: "bits user",
-                initiator: "other",
-                product: {
-                    displayName: "test SKU",
-                    sku: "test1000-1",
-                    cost: {
-                        amount: 1000,
-                        type: "bits"
-                    },
-                },
+                price: 100,
                 transactionId: String(Math.random()),
-                userId: "0",
+                userId: '0',
+                message: 'Test message',
             },
-            message: 'Test message',
-            pending: false,
             settings: this.state.settings,
         };
 
-        //TODO: send stuff
+        authentication.makeCall(`${configs.relayURL}/notify`, 'POST', {requestReceived});
     }
 
     copyNotificationBoxUrl() {
@@ -178,11 +175,11 @@ export default class Setting extends React.Component {
         this.toast.show({html: '<i class="material-icons">done</i>Notification URL copied!', classes: 'success'});
     }
 
-    toggleActive(e: ChangeEvent<HTMLInputElement>, index: number, price: string) {
+    toggleActive(e: ChangeEvent<HTMLInputElement>, index: number) {
         let target = e.target;
         this.setState((prevState: State) => {
-            let newRequests: Requests = Object.assign({}, prevState.requests);
-            newRequests[price][index].active = target.checked;
+            let newRequests: Array<Request> = [...prevState.requests];
+            newRequests[index].active = target.checked;
             return {requests: newRequests};
         });
     }
@@ -193,51 +190,30 @@ export default class Setting extends React.Component {
         });
     }
 
-    renderForm(price: string) {
-        return this.state.requests[price].map((request: Request, index: number) => {
-            return <div key={`request-form-${price}-${index}`} className="clearfix">
+    renderForm() {
+        return this.state.requests.map((request: Request, index: number) => {
+            return <div key={`request-form-${index}`} className="clearfix">
                 <div className="input-container request-form left">
-                    <InputField value={request.title} label="Title" id={`request-form-title-${price}-${index}`} onChange={this.onRequestChange(index, price, 'title')}/>
-                    <Textarea value={request.description} label="Description" id={`request-form-description-${price}-${index}`} onChange={this.onRequestChange(index, price, 'description')} />
+                    <InputField value={request.title} label="Title" id={`request-form-title-${index}`} onChange={this.onRequestChange(index, 'title')}/>
+                    <Textarea value={request.description} label="Description" id={`request-form-description-${index}`} onChange={this.onRequestChange(index, 'description')} />
+                    <InputField className="price" type="number" step="1" value={request.price} label="Price" id={`request-form-price-${index}`} onChange={this.onRequestChange(index, 'price')}/>
                 </div>
-                <button disabled={this.state.requests[price].length-1 === index && !request.title.length && !request.description.length} className="btn waves-effect waves-light delete-request btn-floating left" onClick={this.onDeleteRequest(index, price)}>
+                <button disabled={this.state.requests.length-1 === index && !request.title.length && !request.description.length} className="btn waves-effect waves-light delete-request btn-floating left" onClick={this.onDeleteRequest(index)}>
                     <i className="material-icons">close</i>
                 </button>
-                <Switch className="disable-switch" checked={request.active} label="Active" onChange={this.onToggleActive(index, price)}/>
+                <Switch className="disable-switch" checked={request.active} label="Active" onChange={this.onToggleActive(index)}/>
             </div>;
         });
     }
 
-    renderItems() {
-        return Object.keys(this.state.requests).map((price: string) => {
-            let counter = 0;
-            this.state.requests[price].forEach((request) => {
-                if (request.title || request.description) {
-                    counter++;
-                }
-            });
-
-            return <CollapsibleItem key={`collapsible-item-${price}`} title={`${price} bits requests (${counter})`}>
-                {this.renderForm(price)}
-            </CollapsibleItem>
-        });
-    }
-
     render() {
-        const {configs} = this.props;
+        const {configs, authentication} = this.props;
 
         return (
             <div className="config">
-                <h2>Requests settings</h2>
-                <div className="requests-form">
-                    <Collapsible onOpenStart={this.onOpenStart()}>
-                        {this.renderItems()}
-                    </Collapsible>
-                </div>
-
-                <h2>Notifications settings</h2>
+                <h2>Settings</h2>
                 <div className="notification-box">
-                    <InputField className="notification-box-url" inputRef={(el) => this.notificationBoxUrl = el} value={`http://bob.com/#/123`} label="Notification box URL (Add as browser source in OBS)" id="notification-box-url" readOnly />
+                    <InputField className="notification-box-url" type="email" inputRef={(el) => this.notificationBoxUrl = el} value={`${configs.purchaseURL}/#/${authentication.getStreamlabs().profiles.streamlabs.id}`} label="This is the link to make requests to your channel" id="notification-box-url" readOnly />
 
                     <a className="copy-notification-box-url" onClick={this.onCopyNotificationBoxUrl()}><i className="material-icons">insert_link</i> Copy link</a>
                     <button className="btn waves-effect waves-light" onClick={this.onTestNotifier()}>Test notification</button>
@@ -246,10 +222,20 @@ export default class Setting extends React.Component {
                 <div className="notifications">
                     <Switch checked={this.state.settings.showImage} label="Show image" onChange={this.onUpdateSettings('showImage')}/>
                     <Switch checked={this.state.settings.playSound} label="Play sound" onChange={this.onUpdateSettings('playSound')}/>
-                    <Switch checked={this.state.settings.sendChat} label="Send to chat" onChange={this.onUpdateSettings('sendChat')}/>
                 </div>
+
+                <InputField className="paypal-email" value={this.state.settings.paypalEmail} label="Your paypal email" id="paypal-email" onChange={this.onPaypalEmailChange()} />
+
+                <div className="requests-form">
+                    <Collapsible onOpenStart={this.onOpenStart()}>
+                        <CollapsibleItem title="Request list" className="active">
+                            {this.renderForm()}
+                        </CollapsibleItem>
+                    </Collapsible>
+                </div>
+
                 <div>
-                    <button className="btn waves-effect waves-light" onClick={this.onUpdateConfiguration()}>Save settings</button>
+                    <button disabled={!this.state.settings.paypalEmail} className="btn waves-effect waves-light" onClick={this.onUpdateConfiguration()}>Save settings</button>
                 </div>
             </div>
         )

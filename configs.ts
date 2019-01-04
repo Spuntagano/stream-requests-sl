@@ -1,15 +1,27 @@
 const configs:any = {
     testing: {
-        notifierURL: 'http://localhost:3005',
-        relayURL: 'https://docker.dev:3002'
+        relayURL: 'https://docker.dev:3002',
+        ipnURL: 'https://docker.dev:3002/paypal-ipn',
+        wsURL: 'wss://docker.dev:3004',
+        returnURL: 'http://localhost:8080/purchase.html',
+        cdnBasePath: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
+        purchaseURL: 'http://localhost:8080/purchase.html'
     },
     hosted_test: {
-        notifierURL: 'http://stream-requests-notifier-staging.s3-website-us-west-2.amazonaws.com',
-        relayURL: 'https://stream-requests.com:8043'
+        relayURL: 'http://142.93.117.63',
+        ipnURL: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
+        wsURL: 'wss://142.93.117.63:9004',
+        returnURL: 'http://localhost:8080/purchase.html',
+        cdnBasePath: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
+        purchaseURL: 'http://localhost:8080/purchase.html'
     },
     released: {
-        notifierURL: 'http://stream-requests-notifier.s3-website-us-west-2.amazonaws.com',
-        relayURL: 'https://stream-requests.com'
+        relayURL: 'http://142.93.117.63',
+        ipnURL: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
+        wsURL: 'wss://142.93.117.63:3004',
+        returnURL: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
+        cdnBasePath: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
+        purchaseURL: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com'
     }
 };
 

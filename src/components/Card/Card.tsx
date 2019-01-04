@@ -5,10 +5,10 @@ import './Card.scss';
 type Props = {
     title: string,
     subtitle: string,
-    className: string
+    className?: string
     onClose: () => void,
     mainAction: Action,
-    secondaryAction: Action,
+    secondaryAction?: Action,
     children: Array<JSX.Element>
 }
 

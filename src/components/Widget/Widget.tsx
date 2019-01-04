@@ -1,11 +1,11 @@
 import * as React from 'react';
 import './Widget.scss';
-import Requests from '../../types/Requests';
+import Request from '../../types/Request';
 import Products from '../../types/Products';
 import Settings from '../../types/Settings';
 import Configs from '../../types/Configs';
-import Streamlabs from '../../types/Streamlabs';
 import RequestReceived from '../../types/RequestReceived';
+import Authentication from '../../lib/Authentication/Authentication';
 
 type State = {
     requestsReceived: Array<RequestReceived>,
@@ -13,11 +13,11 @@ type State = {
 }
 
 type Props = {
-    requests?: Requests,
+    requests?: Array<Request>,
     products?: Products,
     settings?: Settings,
     configs?: Configs,
-    streamlabs?: Streamlabs
+    authentication?: Authentication
 };
 
 class App extends React.Component {
@@ -38,7 +38,7 @@ class App extends React.Component {
         this.shiftRequest = this.shiftRequest.bind(this);
         this.showRequest = this.showRequest.bind(this);
         this.connect = this.connect.bind(this);
-        this.sound = new Audio('/assets/sounds/good-news.mp3');
+        this.sound = new Audio(`${props.configs.cdnBasePath}/assets/sounds/good-news.mp3`);
     }
 
     componentDidMount() {
@@ -46,9 +46,10 @@ class App extends React.Component {
     }
 
     connect() {
-        const {streamlabs} = this.props;
+        const {authentication, configs} = this.props;
+        const streamlabs = authentication.getStreamlabs();
 
-        this.websocket = new WebSocket(streamlabs.settings.WS_URL, streamlabs.profiles.twitch.twitch_id);
+        this.websocket = new WebSocket(configs.wsURL, streamlabs.profiles.streamlabs.id);
         this.websocket.onclose = () => this.onClose();
         this.websocket.onopen = () => this.onOpen();
         this.websocket.onmessage = (evt: MessageEvent) => this.onMessage(evt);
@@ -70,16 +71,6 @@ class App extends React.Component {
     onMessage(evt: MessageEvent) {
         try {
             let message = JSON.parse(evt.data);
-            let duplicate = false;
-
-            this.state.requestsReceived.forEach((requestReceived) => {
-                if (requestReceived.transaction.transactionId === message.requestReceived.transaction.transactionId) {
-                    duplicate = true;
-                    return;
-                }
-            });
-
-            if (duplicate) return;
 
             this.setState((prevState: State) => {
                 let newRequestsReceived: Array<RequestReceived> = [...prevState.requestsReceived];
@@ -137,12 +128,14 @@ class App extends React.Component {
     }
 
     render() {
+        const {configs} = this.props;
+
         return (
             <div className="app">
                 <div className="notification-container">
                     <div className={(this.state.displayNotification) ? "notification-message" : "notification-message hide"}>
-                        {!!this.state.requestsReceived.length && this.state.requestsReceived[0].settings.showImage && <img src="/assets/images/gift.png" />}
-                        {!!this.state.requestsReceived.length && <div>Thank you <span className="requester-name">{this.state.requestsReceived[0].transaction.displayName}</span> for requesting <span className="request-name">{this.state.requestsReceived[0].request.title}</span> for <span className="request-price">{this.state.requestsReceived[0].transaction.product.cost.amount} {this.state.requestsReceived[0].transaction.product.cost.type}</span> {(this.state.requestsReceived[0].message) ? `Message: ${this.state.requestsReceived[0].message}` : ''}</div>}
+                        {!!this.state.requestsReceived.length && this.state.requestsReceived[0].settings.showImage && <img src={`${configs.cdnBasePath}/assets/images/gift.png`} />}
+                        {!!this.state.requestsReceived.length && <div>Thank you <span className="requester-name">{this.state.requestsReceived[0].transaction.displayName}</span> for requesting <span className="request-name">{this.state.requestsReceived[0].transaction.title}</span> for <span className="request-price">{this.state.requestsReceived[0].transaction.price}$</span> {(this.state.requestsReceived[0].transaction.message) ? `Message: ${this.state.requestsReceived[0].transaction.message}` : ''}</div>}
                     </div>
                 </div>
             </div>

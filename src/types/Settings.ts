@@ -1,5 +1,5 @@
 type Settings = {
-    [s: string]: boolean,
+    [s: string]: any,
 }
 
 export default Settings;

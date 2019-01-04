@@ -3,6 +3,7 @@ var aws = require('aws-sdk');
 var fs = require('fs');
 var path = require('path');
 var mime = require('mime-types');
+var recursive = require("recursive-readdir");
 
 var basePath = path.normalize(__dirname + '/../');
 var config = JSON.parse(fs.readFileSync(basePath + 'aws-config.json'));
@@ -13,6 +14,15 @@ var s3 = new aws.S3({
   endpoint: spacesEndpoint,
   accessKeyId: config.accessKeyId,
   secretAccessKey: config.secretAccessKey
+});
+
+// @ts-ignore
+recursive(basePath+'public/assets', function (err, files) {
+  // @ts-ignore
+  files.forEach((file) => {
+    var relPath = file.split(basePath+'public/')[1];
+    upload(relPath, file);
+  });
 });
 
 upload('index.html', basePath+'dist/purchase.html');

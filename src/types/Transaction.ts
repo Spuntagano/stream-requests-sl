@@ -1,19 +1,11 @@
 import Product from './Product';
 
 type transaction = {
+    title: string,
     displayName: string,
-    initiator: string,
-    product: Product,
+    price: number,
+    message: string,
     transactionId: string,
-    transactionReceipt?: string,
-    topic?: string,
-    expires?: string,
-    data?: {
-        product: Product,
-        time: string,
-        transactionId: string,
-        userId: string,
-    },
     userId: string
 }
 

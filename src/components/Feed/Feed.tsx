@@ -1,126 +1,127 @@
 import * as React from 'react'
-import Requests from '../../types/Requests';
+import Request from '../../types/Request';
 import Products from '../../types/Products';
-import Product from '../../types/Product';
 import RequestReceived from '../../types/RequestReceived';
-import Transaction from '../../types/Transaction';
 import Settings from '../../types/Settings';
 import Configs from '../../types/Configs';
+import Transaction from '../../types/Transaction';
 import Collection from "../Collection/Collection";
+import Toast from "../../lib/Toast/Toast";
 import './Feed.scss';
 import CollectionItem from '../Collection/CollectionItem/CollectionItem';
-import Streamlabs from '../../types/Streamlabs';
+import Authentication from '../../lib/Authentication/Authentication';
 
 type State = {
     requestsReceived: Array<RequestReceived>,
 }
 
 type Props = {
-    requests?: Requests,
+    requests?: Array<Request>,
     products?: Products,
     settings?: Settings,
     configs?: Configs,
-    streamlabs?: Streamlabs
+    authentication?: Authentication
 };
 
 export default class Feed extends React.Component {
-    public twitch: any;
     public state: State;
     public props: Props;
+    public toast: Toast;
+    public websocket: WebSocket;
 
     constructor(props: Props) {
         super(props);
 
-        // @ts-ignore
-        this.twitch = window.Twitch ? window.Twitch.ext : null;
         this.state = {
             requestsReceived: [],
         };
     }
 
-    componentDidMount() {
-        const {configs} = this.props;
+    async componentDidMount() {
+        const {authentication, configs, settings} = this.props;
 
-        if (this.twitch) {
-            //TODO: load requests
-        }
-    }
+        this.connect();
 
-    componentWillUnmount() {
-        if (this.twitch) {
-            this.twitch.unlisten('broadcast');
-        }
-    }
+        try {
+            let promise: any = await authentication.makeCall(`${configs.relayURL}/transaction`);
+            let transactions = (await promise.json()).transactions;
 
-    transactionComplete(transaction: Transaction) {
-        const {products, requests, settings} = this.props;
+            let newRequestsReceived: Array<RequestReceived> = [];
+            transactions.forEach((transaction: Transaction) => {
+                newRequestsReceived.push({
+                    transaction,
+                    settings
+                })
+            });
 
-        let index = -1;
-        let price = '';
-        let valid = false;
-
-        Object.keys(products).forEach((p: string) => {
-            products[p].forEach((product: Product, i: number) => {
-                if (transaction.product.sku === product.sku) {
-                    index = i;
-                    price = p.toString();
-                    valid = true;
+            this.setState(() => {
+                return {
+                    requestsReceived: newRequestsReceived
                 }
-            })
-        });
+            });
+        } catch (e) {
+            this.toast.show({html: '<i class="material-icons">done</i>Error loading requests', classes: 'error'});
+        }
+    }
 
-        if (!valid) throw('Invalid transaction');
+    connect() {
+        const {authentication, configs} = this.props;
+        const streamlabs = authentication.getStreamlabs();
 
-        const requestReceived: RequestReceived = {
-            request: requests[price][index],
-            settings: settings,
-            transaction,
-            message: null,
-            pending: true,
-        };
+        this.websocket = new WebSocket(configs.wsURL, streamlabs.profiles.streamlabs.id);
+        this.websocket.onclose = () => this.onClose();
+        this.websocket.onopen = () => this.onOpen();
+        this.websocket.onmessage = (evt: MessageEvent) => this.onMessage(evt);
+    }
 
-        this.setState((prevState: State) => {
-            let newRequestsReceived: Array<RequestReceived> = [...prevState.requestsReceived];
-            newRequestsReceived.unshift(requestReceived);
+    onClose() {
+        let reconnectTime = Math.random()*3000 + 2000;
+        console.log(`Disconnected, reconnecting in ${Math.floor(reconnectTime/1000)}s`);
 
-            return {requestsReceived: newRequestsReceived};
-        });
+        setTimeout(() => {
+            this.connect();
+        }, reconnectTime);
+    }
+
+    onOpen() {
+        console.log('Connected');
+    }
+
+    onMessage(evt: MessageEvent) {
+        try {
+            let message = JSON.parse(evt.data);
+
+            this.setState((prevState: State) => {
+                let newRequestsReceived: Array<RequestReceived> = [...prevState.requestsReceived];
+                newRequestsReceived.unshift(message.requestReceived);
+
+                return {
+                    requestsReceived: newRequestsReceived
+                };
+            });
+        } catch (e) {
+            console.error('Misformatted message received')
+        }
     }
 
     renderCollectionItems() {
-        let count = 0;
-        this.state.requestsReceived.forEach((requestReceived) => {
-            if (!requestReceived.pending) {
-                count++;
-            }
-        });
-
-        if (!count) {
-            return <CollectionItem primaryContent="The broadcaster has no active requests for now" full />
-        }
-
         if (!this.state.requestsReceived.length) {
             return <CollectionItem primaryContent="Incoming requests will appear here" full />
         }
 
         return this.state.requestsReceived.map((requestReceived, index) => {
-            if (!requestReceived.pending) {
-                return <CollectionItem
-                    key={`collection-item-${index}`}
-                    primaryContent={`${requestReceived.transaction.displayName} requested ${requestReceived.request.title} ${(requestReceived.message) ? 'Message: ' + requestReceived.message: ''}`}
-                    secondaryContent={`${requestReceived.transaction.product.cost.amount} ${requestReceived.transaction.product.cost.type}`}
-                />
-            }
+            return <CollectionItem
+                key={`collection-item-${index}`}
+                primaryContent={`${requestReceived.transaction.displayName} requested ${requestReceived.transaction.title} ${(requestReceived.transaction.message) ? 'Message: ' + requestReceived.transaction.message: ''}`}
+                secondaryContent={`${requestReceived.transaction.price}$`}
+            />
         });
     }
 
     render() {
         return (
             <div className="live-config">
-                <Collection
-                    title="Stream Requests"
-                    tooltip="Keep this window open for notifications to show."
-                >
+                <Collection title="Requests received">
                     {this.renderCollectionItems()}
                 </Collection>
             </div>

@@ -37,7 +37,7 @@
   }
 
   .requests-form {
-    margin: 8px;
+    margin-bottom: 40px;
 
     .request-form {
       width: calc(100% - 5rem);
@@ -45,6 +45,10 @@
 
     .delete-request {
       margin: 4.8rem 0 0 1.3rem;
+    }
+
+    .price {
+      max-width: 70px;
     }
 
     .disable-switch {
@@ -55,6 +59,14 @@
       }
     }
   }
+
+  .paypal-email {
+    margin-bottom: 50px;
+  }
+}
+
+html {
+  background-color: #17242d;
 }
 
 .dark-theme {

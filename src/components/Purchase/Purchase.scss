@@ -2,39 +2,22 @@
 
 .panel {
   color: $dark-text;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
   z-index: -10;
-  background-color: #fff;
-
-  .request-container {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    top: 47px;
-
-    .fullscreen {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      top: 0;
-      margin: 0;
-    }
-  }
+  width: 70%;
+  margin: 0 auto;
 
   .description {
-    margin-bottom: 25px!important;
+    margin-bottom: 25px !important;
   }
+}
+
+html {
+  background-color: $dark-background;
 }
 
 .dark-theme {
   .panel {
-    background-color: $dark-background;
+    background-color: lighten($dark-background, 5%);
     border: 1px solid $dark-border-color;
     color: $light-text;
   }

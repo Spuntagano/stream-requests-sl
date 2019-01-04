@@ -40,6 +40,6 @@
 
 .dark-theme {
   .card {
-    background-color: $dark-background;
+    background-color: lighten($dark-background, 5%);
   }
 }
