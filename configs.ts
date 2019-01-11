@@ -8,17 +8,17 @@ const configs:any = {
         purchaseURL: 'http://localhost:8080/purchase.html'
     },
     hosted_test: {
-        relayURL: 'http://142.93.117.63',
+        relayURL: 'http://142.93.117.63:8080',
         ipnURL: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
-        wsURL: 'wss://142.93.117.63:9004',
-        returnURL: 'http://localhost:8080/purchase.html',
-        cdnBasePath: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
-        purchaseURL: 'http://localhost:8080/purchase.html'
+        wsURL: 'ws://142.93.117.63:9003',
+        returnURL: 'http://stream-requests-purchase-staging.s3-website-us-west-2.amazonaws.com',
+        cdnBasePath: 'http://stream-requests-purchase-staging.s3-website-us-west-2.amazonaws.com',
+        purchaseURL: 'http://stream-requests-purchase-staging.s3-website-us-west-2.amazonaws.com'
     },
     released: {
         relayURL: 'http://142.93.117.63',
         ipnURL: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
-        wsURL: 'wss://142.93.117.63:3004',
+        wsURL: 'ws://142.93.117.63:3003',
         returnURL: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
         cdnBasePath: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
         purchaseURL: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com'

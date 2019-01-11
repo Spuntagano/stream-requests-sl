@@ -110,6 +110,11 @@ export default class Setting extends React.Component {
     async updateConfiguration() {
         const {configs, authentication} = this.props;
 
+        if (!this.state.settings.paypalEmail) {
+            this.toast.show({html: '<i class="material-icons">done</i>Please enter your paypal email', classes: 'error'});
+            return;
+        }
+
         let requests: Array<Request> = [];
         this.state.requests.forEach(() => {
             requests = this.state.requests.filter((request) => {
@@ -222,6 +227,7 @@ export default class Setting extends React.Component {
                 <div className="notifications">
                     <Switch checked={this.state.settings.showImage} label="Show image" onChange={this.onUpdateSettings('showImage')}/>
                     <Switch checked={this.state.settings.playSound} label="Play sound" onChange={this.onUpdateSettings('playSound')}/>
+                    <Switch checked={this.state.settings.profanityFilter} label="Profanity filter" onChange={this.onUpdateSettings('profanityFilter')}/>
                 </div>
 
                 <InputField className="paypal-email" value={this.state.settings.paypalEmail} label="Your paypal email" id="paypal-email" onChange={this.onPaypalEmailChange()} />
@@ -235,7 +241,7 @@ export default class Setting extends React.Component {
                 </div>
 
                 <div>
-                    <button disabled={!this.state.settings.paypalEmail} className="btn waves-effect waves-light" onClick={this.onUpdateConfiguration()}>Save settings</button>
+                    <button className="btn waves-effect waves-light" onClick={this.onUpdateConfiguration()}>Save settings</button>
                 </div>
             </div>
         )
