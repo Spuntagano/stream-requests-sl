@@ -12,7 +12,8 @@ type State = {
     configured: boolean,
     requests: Array<Request>,
     settings: Settings,
-    configs: Configs
+    configs: Configs,
+    theme: string
 }
 
 type Props = {
@@ -39,6 +40,7 @@ export default class App extends React.Component {
             requests: [],
             settings: {},
             configs: configs[state],
+            theme: 'night'
         }
     }
 
@@ -74,6 +76,30 @@ export default class App extends React.Component {
                 }
             }
         });
+
+        // @ts-ignore
+        if (window.streamlabsOBS) {
+            // @ts-ignore
+            window.streamlabsOBS.apiReady.then(() => {
+                // @ts-ignore
+                window.streamlabsOBS.v1.Theme.getTheme().then((theme) => {
+                    this.themeUpdate(theme);
+                });
+
+                // @ts-ignore
+                window.streamlabsOBS.v1.Theme.themeChanged((theme) => {
+                    this.themeUpdate(theme);
+                });
+            });
+        }
+    }
+
+    themeUpdate(theme: string) {
+        this.setState(() => {
+            return {
+                theme
+            }
+        });
     }
 
     render() {
@@ -89,11 +115,10 @@ export default class App extends React.Component {
         });
 
         return (
-            <div className="app dark-theme">
+            <div className={`app clearfix ${(this.state.theme === 'night') ? 'night-theme' : ''}`}>
                 {this.state.configured && childrens}
                 {(showLoading && !this.state.configured) && <Loading />}
             </div>
         )
-
     }
 }

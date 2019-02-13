@@ -11,7 +11,8 @@ type Props = {
     readOnly?: boolean,
     inputRef?: (el: HTMLInputElement) => void,
     type?: string,
-    step?: string
+    step?: string,
+    maxLength?: number
 }
 
 export default class InputField extends React.Component {
@@ -22,11 +23,11 @@ export default class InputField extends React.Component {
     }
 
     render() {
-        const {value, label, id, onChange, readOnly, inputRef, className, type, step} = this.props;
+        const {value, label, id, onChange, readOnly, inputRef, className, type, step, maxLength} = this.props;
 
         return (
             <div className={`input-field ${className}`}>
-                <input ref={inputRef} readOnly={readOnly} id={id} type={type || 'text'} value={value} step={step} onChange={onChange}/>
+                <input ref={inputRef} readOnly={readOnly} maxLength={maxLength} id={id} type={type || 'text'} value={value} step={step} onChange={onChange}/>
                 <label className={(value) ? 'active' : ''} htmlFor={id}>{label}</label>
             </div>
         )

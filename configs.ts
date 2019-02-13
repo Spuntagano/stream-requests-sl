@@ -8,17 +8,17 @@ const configs:any = {
         purchaseURL: 'http://localhost:8080/purchase.html'
     },
     hosted_test: {
-        relayURL: 'http://142.93.117.63:8080',
+        relayURL: 'https://api-sl.stream-requests.com:8043',
         ipnURL: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
-        wsURL: 'ws://142.93.117.63:9003',
+        wsURL: 'wss://api-sl.stream-requests.com:9004',
         returnURL: 'http://stream-requests-purchase-staging.s3-website-us-west-2.amazonaws.com',
         cdnBasePath: 'http://stream-requests-purchase-staging.s3-website-us-west-2.amazonaws.com',
         purchaseURL: 'http://stream-requests-purchase-staging.s3-website-us-west-2.amazonaws.com'
     },
     released: {
-        relayURL: 'http://142.93.117.63',
-        ipnURL: 'https://www.sandbox.paypal.com/cgi-bin/webscr',
-        wsURL: 'ws://142.93.117.63:3003',
+        relayURL: 'https://api-sl.stream-requests.com',
+        ipnURL: 'https://www.paypal.com/cgi-bin/webscr',
+        wsURL: 'wss://api-sl.stream-requests.com:3004',
         returnURL: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
         cdnBasePath: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com',
         purchaseURL: 'http://stream-requests-purchase.s3-website-us-west-2.amazonaws.com'

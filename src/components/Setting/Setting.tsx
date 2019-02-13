@@ -27,7 +27,6 @@ type Props = {
 
 export default class Setting extends React.Component {
     public toast: Toast;
-    public twitch: any;
     public onUpdateConfiguration: () => (e: MouseEvent<HTMLButtonElement>) => void;
     public onUpdateSettings: (update: string) => (e: ChangeEvent<HTMLInputElement>) => void;
     public onToggleActive: (index: number) => (e: ChangeEvent<HTMLInputElement>) => void;
@@ -48,7 +47,6 @@ export default class Setting extends React.Component {
         this.toast = new Toast();
 
         // @ts-ignore
-        this.twitch = window.Twitch ? window.Twitch.ext : null;
         this.state = {
             requests: props.requests,
             settings: props.settings,
@@ -76,7 +74,7 @@ export default class Setting extends React.Component {
         this.setState((prevState: State) => {
             let newRequests: Array<Request> = [...prevState.requests];
             if (newRequests[newRequests.length-1][update].length) {
-                newRequests.push({title: '', description: '', active: false, price: 0});
+                newRequests.push({title: '', description: '', active: false, price: ''});
             }
 
             if (!newRequests[index].description.length && !newRequests[index].title.length && value.length) {
@@ -161,7 +159,7 @@ export default class Setting extends React.Component {
         let requestReceived: RequestReceived = {
             transaction: {
                 title: 'test request',
-                displayName: "bits user",
+                displayName: "test user",
                 price: 100,
                 transactionId: String(Math.random()),
                 userId: '0',

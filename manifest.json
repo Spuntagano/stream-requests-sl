@@ -2,18 +2,15 @@
   "name": "Stream Requests",
   "version": "0.0.1",
   "buildPath": "dist/",
-  "permissions": ["slobs.scenes-sources", "slobs.obs-settings"],
+  "supportedPlatforms": ["twitch", "youtube", "facebook", "mixer"],
+  "permissions": ["slobs.scenes-sources"],
   "sources": [
     {
       "type": "browser_source",
-      "name": "Example Widget",
-      "id": "streamlabs_example_widget",
+      "name": "Stream Requests",
+      "id": "stream_requests",
       "about": {
-        "description": "This widget will play a cool animation when a button is clicked",
-        "bullets": [
-          "Plays cool animations"
-        ],
-        "bannerImage": "colbert.gif"
+        "description": "Source for the notifications to appear on stream."
       },
       "file": "widget.html",
       "initialSize": {
@@ -26,11 +23,7 @@
   "pages": [
     {
       "slot": "top_nav",
-      "file": "setting.html",
-      "popOutSize": {
-        "width": 300,
-        "height": 500
-      }
+      "file": "setting.html"
     }
   ]
 }

@@ -5,10 +5,10 @@ import Card from '../Card/Card';
 import Request from '../../types/Request';
 import {ChangeEvent} from 'react';
 import Textarea from '../Textarea/Textarea';
+import InputField from '../InputField/InputField';
 import CollectionItem from '../Collection/CollectionItem/CollectionItem';
 import configs from '../../../configs';
 import Configs from '../../types/Configs';
-import User from '../../types/User';
 import Settings from '../../types/Settings';
 import Toast from '../../lib/Toast/Toast';
 import '../../sass/simple-grid.scss';
@@ -23,7 +23,7 @@ type State = {
     index: number,
     showInfo: boolean,
     message: string,
-    user: User,
+    name: string,
     requests: Array<Request>,
     settings: Settings
 }
@@ -37,6 +37,7 @@ export default class Purchase extends React.Component {
     public onShowRequest: (index: number) => (e: MouseEvent<HTMLAnchorElement>) => void;
     public onShowRequests: () => () => void;
     public onMessageChange: () => (e: ChangeEvent<HTMLTextAreaElement>) => void;
+    public onNameChange: () => (e: ChangeEvent<HTMLInputElement>) => void;
 
     constructor(props: Props) {
         super(props);
@@ -46,6 +47,7 @@ export default class Purchase extends React.Component {
         this.onShowRequest = (index: number) => (e: MouseEvent<HTMLAnchorElement>) => this.showRequest(e, index);
         this.onShowRequests = () => () => this.showRequests();
         this.onMessageChange = () => (e: ChangeEvent<HTMLTextAreaElement>) => this.messageChange(e);
+        this.onNameChange = () => (e: ChangeEvent<HTMLInputElement>) => this.nameChange(e);
 
         const url = new URL(window.location.href);
         const state = url.searchParams.get('state') || 'released';
@@ -55,10 +57,7 @@ export default class Purchase extends React.Component {
             index: null,
             showInfo: false,
             message: '',
-            user: {
-                displayName: '',
-                userId: ''
-            },
+            name: '',
             requests: [],
             settings: {}
         }
@@ -68,18 +67,15 @@ export default class Purchase extends React.Component {
         try {
             let promises: any = await Promise.all([
                 fetch(`${this.configs.relayURL}/request/${this.props.match.params.userId}`),
-                fetch(`${this.configs.relayURL}/user/${this.props.match.params.userId}`),
                 fetch(`${this.configs.relayURL}/setting/${this.props.match.params.userId}`)
             ]);
 
             let requests = (await promises[0].json()).requests;
-            let user = (await promises[1].json()).user;
-            let settings = (await promises[2].json()).settings;
+            let settings = (await promises[1].json()).settings;
 
             this.setState(() => {
                 return {
                     requests,
-                    user,
                     settings
                 }
             });
@@ -114,6 +110,14 @@ export default class Purchase extends React.Component {
         });
     }
 
+    nameChange(e: ChangeEvent<HTMLInputElement>) {
+        const value = e.target.value;
+
+        this.setState(() => {
+            return {name: value};
+        });
+    }
+
     renderCollectionItems() {
         let count = 0;
         this.state.requests.forEach((request) => {
@@ -133,7 +137,7 @@ export default class Purchase extends React.Component {
                     key={`collection-item-${index}`}
                     className="ellipsis"
                     primaryContent={request.title}
-                    secondaryContent={`${request.price}$`}
+                    secondaryContent={`${request.price.toFixed(2)}$`}
                     onClick={this.onShowRequest(index)}
                     ellipsis
                 />)
@@ -147,12 +151,12 @@ export default class Purchase extends React.Component {
         const {match} = this.props;
 
         return (
-            <div className="app dark-theme">
+            <div className="app night-theme">
                 <div className="panel container">
                     <div className="row">
                         <div className="col-12">
                             <h2>Stream Requests</h2>
-                            <p>Stream request is a new way to interact with the streamer. It allows viewers to exchange bits for requests listed below.</p>
+                            <p>Stream request is a new way to interact with the streamer. It allows viewers to pay for requests listed below.</p>
                         </div>
                     </div>
                     <div className="row">
@@ -164,7 +168,7 @@ export default class Purchase extends React.Component {
                         <div className={`col-6 col-sm-12 scale-transition ${this.state.showInfo ? 'scale-in' : 'scale-out'}`}>
                             {this.state.showInfo && <Card
                               title={this.state.requests[this.state.index].title}
-                              subtitle={`${this.state.requests[this.state.index].price}$`}
+                              subtitle={`${this.state.requests[this.state.index].price.toFixed(2)}$`}
                               onClose={this.onShowRequests()}
                               mainAction={{
                                   text: 'Request',
@@ -177,13 +181,14 @@ export default class Purchase extends React.Component {
                                 <input type="hidden" name="cmd" value="_xclick" />
                                 <input type="hidden" name="notify_url" value={`${this.configs.relayURL}/paypal-ipn`} />
                                 <input type="hidden" name="item_name" value={this.state.requests[this.state.index].title} />
-                                <input type="hidden" name="custom" value={JSON.stringify({message: this.state.message, userId: match.params.userId, displayName: this.state.user.displayName, index: this.state.index})} />
+                                <input type="hidden" name="custom" value={JSON.stringify({message: this.state.message, userId: match.params.userId, displayName: this.state.name, index: this.state.index})} />
                                 <input type="hidden" name="amount" value={this.state.requests[this.state.index].price} />
                                 <input type="hidden" name="currency_code" value="USD" />
                                 <input type="hidden" name="no_shipping" value="1" />
                                 <input type="hidden" name="return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
                                 <input type="hidden" name="cancel_return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
                               </form>
+                              <InputField value={this.state.name} label="Your Name" id="request-message" maxLength={20} onChange={this.onNameChange()} />
                               <Textarea value={this.state.message} label="Message" id="request-message" maxLength={150} onChange={this.onMessageChange()} />
                             </Card>}
                         </div>

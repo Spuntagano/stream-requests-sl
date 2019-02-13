@@ -113,7 +113,7 @@ export default class Feed extends React.Component {
             return <CollectionItem
                 key={`collection-item-${index}`}
                 primaryContent={`${requestReceived.transaction.displayName} requested ${requestReceived.transaction.title} ${(requestReceived.transaction.message) ? 'Message: ' + requestReceived.transaction.message: ''}`}
-                secondaryContent={`${requestReceived.transaction.price}$`}
+                secondaryContent={`${requestReceived.transaction.price.toFixed(2)}$`}
             />
         });
     }

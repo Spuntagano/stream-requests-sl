@@ -50,7 +50,7 @@ module.exports = (_env, argv) => {
     entry,
     devtool: 'inline-source-map',
     optimization: {
-      minimize: false // neccessary to pass Twitch's review process
+      minimize: true
     },
     module: {
       rules: [
@@ -86,7 +86,8 @@ module.exports = (_env, argv) => {
     resolve: {extensions: ['*', '.js', '.jsx', '.ts', '.tsx']},
     output: {
       filename: "[name].bundle.js",
-      path: bundlePath
+      path: bundlePath,
+      publicPath: './'
     },
     plugins
   };
@@ -95,6 +96,7 @@ module.exports = (_env, argv) => {
     config.devServer = {
       contentBase: path.join(__dirname, 'public'),
       host: 'localhost',
+      publicPath: '/',
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
