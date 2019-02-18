@@ -13,7 +13,8 @@ type State = {
     requests: Array<Request>,
     settings: Settings,
     configs: Configs,
-    theme: string
+    theme: string,
+    sourceLoaded: boolean
 }
 
 type Props = {
@@ -26,6 +27,10 @@ export default class App extends React.Component {
     public props: Props;
     public toast: Toast;
     public authentication: Authentication;
+    public streamlabsOBS: any;
+
+    public onDetectAppSource: () => () => void;
+    public onSourceAdded: () => (appSource: any) => void;
 
     constructor(props: Props) {
         super(props);
@@ -34,14 +39,21 @@ export default class App extends React.Component {
         const state = url.searchParams.get('state') || 'released';
         this.authentication = new Authentication();
 
+        // @ts-ignore
+        this.streamlabsOBS = window.streamlabsOBS;
+
         this.toast = new Toast();
         this.state = {
             configured: false,
             requests: [],
             settings: {},
             configs: configs[state],
-            theme: 'night'
-        }
+            theme: 'night',
+            sourceLoaded: false
+        };
+
+        this.onDetectAppSource = () => () => this.detectAppSource();
+        this.onSourceAdded = () => (appSource: any) => this.sourceAdded(appSource);
     }
 
     componentDidMount() {
@@ -77,21 +89,87 @@ export default class App extends React.Component {
             }
         });
 
-        // @ts-ignore
-        if (window.streamlabsOBS) {
-            // @ts-ignore
-            window.streamlabsOBS.apiReady.then(() => {
-                // @ts-ignore
-                window.streamlabsOBS.v1.Theme.getTheme().then((theme) => {
+        if (this.streamlabsOBS) {
+            this.streamlabsOBS.apiReady.then(() => {
+                this.streamlabsOBS.v1.Theme.getTheme().then((theme: any) => {
                     this.themeUpdate(theme);
                 });
 
-                // @ts-ignore
-                window.streamlabsOBS.v1.Theme.themeChanged((theme) => {
+                this.streamlabsOBS.v1.Theme.themeChanged((theme: any) => {
                     this.themeUpdate(theme);
                 });
+
+                this.onDetectAppSource()();
+                this.streamlabsOBS.v1.Sources.sourceAdded(this.onSourceAdded());
+                this.streamlabsOBS.v1.Scenes.sceneAdded(this.onDetectAppSource());
+                this.streamlabsOBS.v1.Sources.sourceRemoved(this.onDetectAppSource());
+                this.streamlabsOBS.v1.Scenes.sceneRemoved(this.onDetectAppSource());
+                this.streamlabsOBS.v1.Sources.sourceUpdated(this.onDetectAppSource());
+                this.streamlabsOBS.v1.Scenes.sceneSwitched(this.onDetectAppSource());
             });
         }
+    }
+
+    async sourceAdded(appSource: any) {
+        let sources = await this.streamlabsOBS.v1.Sources.getAppSources();
+        let sourceLoaded = false;
+
+        sources.forEach((source: any) => {
+            if (source.id === appSource.id) {
+                sourceLoaded = true
+            }
+        });
+
+        this.setState(() => {
+            return {sourceLoaded};
+        })
+    }
+
+    async detectAppSource() {
+        if (this.streamlabsOBS) {
+            let sourceLoaded = false;
+            let scene = await this.streamlabsOBS.v1.Scenes.getActiveScene();
+            let sources = await this.streamlabsOBS.v1.Sources.getAppSources();
+
+            if (!sources.length || !scene.nodes.length) {
+                sourceLoaded = false
+            }
+
+            let nodes: any = [];
+            scene.nodes.forEach(async (node: any) => {
+                if (node.type === 'folder') {
+                    await this.getNodes(node, nodes);
+                } else if (node.type === 'scene_item') {
+                    nodes.push(node);
+                }
+            });
+
+            nodes.forEach((node: any) => {
+                sources.forEach((source: any) => {
+                    if (node.sourceId === source.id) {
+                        sourceLoaded = true
+                    }
+                });
+            });
+
+            this.setState(() => {
+                return {sourceLoaded};
+            })
+        }
+    }
+
+    async getNodes(node: any, nodes: any) {
+        node.childrenIds.forEach(async (id: any) => {
+            let item = await this.streamlabsOBS.v1.Scenes.getSceneItem(id);
+
+            if (item) {
+                if (item.type === 'scene_item') {
+                    nodes.push(item);
+                } else if (item.type === 'folder') {
+                    this.getNodes(item, nodes)
+                }
+            }
+        })
     }
 
     themeUpdate(theme: string) {
@@ -111,6 +189,7 @@ export default class App extends React.Component {
                 settings: this.state.settings,
                 configs: this.state.configs,
                 authentication: this.authentication,
+                sourceLoaded: this.state.sourceLoaded
             });
         });
 

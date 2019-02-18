@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {MouseEvent} from "react";
+import {MouseEvent, ReactElement} from 'react';
 import './CollectionItem.scss'
 
 type Props = {
     primaryContent: string,
-    secondaryContent?: string,
+    secondaryContent?: string|ReactElement<any>,
     className?: string,
     onClick?: (e: MouseEvent<HTMLAnchorElement>) => void
     ellipsis?: boolean

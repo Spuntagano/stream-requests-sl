@@ -3,7 +3,7 @@ import CollectionHeader from './CollectionHeader/CollectionHeader';
 import './Collection.scss';
 
 type Props = {
-    title: string,
+    title?: string,
     children: JSX.Element|Array<JSX.Element>|Array<void>,
     tooltip?: string,
     className?: string
@@ -20,8 +20,8 @@ export default class Collection extends React.Component {
         const {title, tooltip, className, children} = this.props;
 
         return (
-            <div className={`collection with-header ${className}`}>
-                <CollectionHeader title={title} tooltip={tooltip} />
+            <div className={`collection ${(title) ? 'with-header' : ''} ${className}`}>
+                {title && <CollectionHeader title={title} tooltip={tooltip} />}
                 {children}
             </div>
         )

@@ -11,7 +11,6 @@ import configs from '../../../configs';
 import Configs from '../../types/Configs';
 import Settings from '../../types/Settings';
 import Toast from '../../lib/Toast/Toast';
-import '../../sass/simple-grid.scss';
 import './Purchase.scss';
 
 type Props = {
@@ -152,47 +151,42 @@ export default class Purchase extends React.Component {
 
         return (
             <div className="app night-theme">
-                <div className="panel container">
-                    <div className="row">
-                        <div className="col-12">
-                            <h2>Stream Requests</h2>
-                            <p>Stream request is a new way to interact with the streamer. It allows viewers to pay for requests listed below.</p>
+                <div className="purchase">
+                    <h2>Stream Requests</h2>
+                    <p>Stream request is a new way to interact with the streamer. It allows viewers to pay for requests listed below.</p>
+                    <Collection title="Requests">
+                        <div className={`request-container ${this.state.showInfo ? 'show-info' : ''}`}>
+                            {this.renderCollectionItems()}
+                            <div className={`scale-transition ${this.state.showInfo ? 'scale-in' : 'scale-out'}`}>
+                                {this.state.showInfo && <Card
+                                  title={this.state.requests[this.state.index].title}
+                                  subtitle={`${this.state.requests[this.state.index].price.toFixed(2)}$`}
+                                  onClose={this.onShowRequests()}
+                                  className="fullscreen"
+                                  mainAction={{
+                                      text: 'Request',
+                                      onClick: () => {this.form.submit()}
+                                  }}
+                                >
+                                  <p className="description">{this.state.requests[this.state.index].description}</p>
+                                  <form ref={el => this.form = el} action={this.configs.ipnURL} method="post">
+                                    <input type="hidden" name="business" value={this.state.settings.paypalEmail} />
+                                    <input type="hidden" name="cmd" value="_xclick" />
+                                    <input type="hidden" name="notify_url" value={`${this.configs.relayURL}/paypal-ipn`} />
+                                    <input type="hidden" name="item_name" value={this.state.requests[this.state.index].title} />
+                                    <input type="hidden" name="custom" value={JSON.stringify({message: this.state.message, userId: match.params.userId, displayName: this.state.name, index: this.state.index})} />
+                                    <input type="hidden" name="amount" value={this.state.requests[this.state.index].price} />
+                                    <input type="hidden" name="currency_code" value="USD" />
+                                    <input type="hidden" name="no_shipping" value="1" />
+                                    <input type="hidden" name="return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
+                                    <input type="hidden" name="cancel_return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
+                                  </form>
+                                  <InputField value={this.state.name} label="Username" id="request-name" maxLength={20} onChange={this.onNameChange()} />
+                                  <Textarea value={this.state.message} label="Message" id="request-message" maxLength={150} onChange={this.onMessageChange()} />
+                                </Card>}
+                            </div>
                         </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-6 col-sm-12">
-                            <Collection title="Request List">
-                                {this.renderCollectionItems()}
-                            </Collection>
-                        </div>
-                        <div className={`col-6 col-sm-12 scale-transition ${this.state.showInfo ? 'scale-in' : 'scale-out'}`}>
-                            {this.state.showInfo && <Card
-                              title={this.state.requests[this.state.index].title}
-                              subtitle={`${this.state.requests[this.state.index].price.toFixed(2)}$`}
-                              onClose={this.onShowRequests()}
-                              mainAction={{
-                                  text: 'Request',
-                                  onClick: () => {this.form.submit()}
-                              }}
-                              >
-                              <p className="description">{this.state.requests[this.state.index].description}</p>
-                              <form ref={el => this.form = el} action={this.configs.ipnURL} method="post">
-                                <input type="hidden" name="business" value={this.state.settings.paypalEmail} />
-                                <input type="hidden" name="cmd" value="_xclick" />
-                                <input type="hidden" name="notify_url" value={`${this.configs.relayURL}/paypal-ipn`} />
-                                <input type="hidden" name="item_name" value={this.state.requests[this.state.index].title} />
-                                <input type="hidden" name="custom" value={JSON.stringify({message: this.state.message, userId: match.params.userId, displayName: this.state.name, index: this.state.index})} />
-                                <input type="hidden" name="amount" value={this.state.requests[this.state.index].price} />
-                                <input type="hidden" name="currency_code" value="USD" />
-                                <input type="hidden" name="no_shipping" value="1" />
-                                <input type="hidden" name="return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
-                                <input type="hidden" name="cancel_return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
-                              </form>
-                              <InputField value={this.state.name} label="Your Name" id="request-message" maxLength={20} onChange={this.onNameChange()} />
-                              <Textarea value={this.state.message} label="Message" id="request-message" maxLength={150} onChange={this.onMessageChange()} />
-                            </Card>}
-                        </div>
-                    </div>
+                    </Collection>
                 </div>
             </div>
         )

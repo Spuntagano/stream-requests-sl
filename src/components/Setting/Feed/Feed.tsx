@@ -1,23 +1,19 @@
 import * as React from 'react'
-import Request from '../../types/Request';
-import Products from '../../types/Products';
-import RequestReceived from '../../types/RequestReceived';
-import Settings from '../../types/Settings';
-import Configs from '../../types/Configs';
-import Transaction from '../../types/Transaction';
-import Collection from "../Collection/Collection";
-import Toast from "../../lib/Toast/Toast";
+import RequestReceived from '../../../types/RequestReceived';
+import Settings from '../../../types/Settings';
+import Configs from '../../../types/Configs';
+import Transaction from '../../../types/Transaction';
+import Collection from "../../Collection/Collection";
+import Toast from "../../../lib/Toast/Toast";
+import CollectionItem from '../../Collection/CollectionItem/CollectionItem';
+import Authentication from '../../../lib/Authentication/Authentication';
 import './Feed.scss';
-import CollectionItem from '../Collection/CollectionItem/CollectionItem';
-import Authentication from '../../lib/Authentication/Authentication';
 
 type State = {
-    requestsReceived: Array<RequestReceived>,
+    requestsReceived: Array<RequestReceived>
 }
 
 type Props = {
-    requests?: Array<Request>,
-    products?: Products,
     settings?: Settings,
     configs?: Configs,
     authentication?: Authentication
@@ -29,8 +25,12 @@ export default class Feed extends React.Component {
     public toast: Toast;
     public websocket: WebSocket;
 
+    public onReplay: (requestReceived: RequestReceived) => () => void;
+
     constructor(props: Props) {
         super(props);
+
+        this.onReplay = (requestReceived: RequestReceived) => () =>this.replay(requestReceived);
 
         this.state = {
             requestsReceived: [],
@@ -93,7 +93,17 @@ export default class Feed extends React.Component {
 
             this.setState((prevState: State) => {
                 let newRequestsReceived: Array<RequestReceived> = [...prevState.requestsReceived];
-                newRequestsReceived.unshift(message.requestReceived);
+
+                let duplicate = false;
+                newRequestsReceived.forEach((requestReceived: RequestReceived) => {
+                    if (message.requestReceived.transaction.transactionId === requestReceived.transaction.transactionId) {
+                        duplicate = true;
+                    }
+                });
+
+                if (!duplicate) {
+                    newRequestsReceived.unshift(message.requestReceived);
+                }
 
                 return {
                     requestsReceived: newRequestsReceived
@@ -113,15 +123,22 @@ export default class Feed extends React.Component {
             return <CollectionItem
                 key={`collection-item-${index}`}
                 primaryContent={`${requestReceived.transaction.displayName} requested ${requestReceived.transaction.title} ${(requestReceived.transaction.message) ? 'Message: ' + requestReceived.transaction.message: ''}`}
-                secondaryContent={`${requestReceived.transaction.price.toFixed(2)}$`}
+                secondaryContent={<div><span>${requestReceived.transaction.price.toFixed(2)}$</span><i onClick={this.onReplay(requestReceived)} className="material-icons">replay</i></div>}
             />
         });
     }
 
+    replay(requestReceived: RequestReceived) {
+        const {authentication, configs, settings} = this.props;
+        requestReceived.settings = settings;
+
+        authentication.makeCall(`${configs.relayURL}/notify`, 'POST', {requestReceived});
+    }
+
     render() {
         return (
-            <div className="live-config">
-                <Collection title="Requests received">
+            <div className="feed">
+                <Collection>
                     {this.renderCollectionItems()}
                 </Collection>
             </div>

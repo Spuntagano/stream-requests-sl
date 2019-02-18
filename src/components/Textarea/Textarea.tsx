@@ -12,9 +12,25 @@ type Props = {
 
 export default class Textarea extends React.Component {
     public props: Props;
+    public materialize: any;
 
     constructor(props: Props) {
         super(props);
+
+        // @ts-ignore
+        this.materialize = M;
+    }
+
+    componentDidMount() {
+        const {id} = this.props;
+
+        this.materialize.textareaAutoResize(document.getElementById(id));
+    }
+
+    componentDidUpdate() {
+        const {id} = this.props;
+
+        this.materialize.textareaAutoResize(document.getElementById(id));
     }
 
     render() {
