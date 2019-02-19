@@ -82,7 +82,7 @@ export default class App extends React.Component {
                     });
                 } catch (e) {
                     this.toast.show({
-                        html: '<i class="material-icons">done</i>Error loading requests',
+                        html: '<i class="material-icons">error_outline</i>Error loading requests',
                         classes: 'error'
                     });
                 }

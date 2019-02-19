@@ -80,7 +80,7 @@ export default class Options extends React.Component {
         return (
             <div className="options">
               <div className="notification-box">
-                <InputField className="notification-box-url" type="email" inputRef={(el) => this.notificationBoxUrl = el} value={`${configs.purchaseURL}/#/${authentication.getStreamlabs().profiles.streamlabs.id}`} label="This is the link to make requests to your channel" id="notification-box-url" readOnly />
+                <InputField className="notification-box-url" type="email" inputRef={(el) => this.notificationBoxUrl = el} value={`${configs.purchaseURL}/#/${authentication.getStreamlabs().profiles.streamlabs.name}`} label="This is the link to make requests to your channel" id="notification-box-url" readOnly />
 
                 <a className="copy-notification-box-url" onClick={this.onCopyNotificationBoxUrl()}><i className="material-icons">insert_link</i> Copy link</a>
                 <button className="btn waves-effect waves-light" onClick={this.onTestNotifier()}>Test notification</button>

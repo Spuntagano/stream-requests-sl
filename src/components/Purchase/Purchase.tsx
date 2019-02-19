@@ -64,9 +64,12 @@ export default class Purchase extends React.Component {
 
     async componentDidMount() {
         try {
+            let userStream = await fetch(`${this.configs.relayURL}/user/${this.props.match.params.displayName}`);
+            let user = (await userStream.json()).user;
+
             let promises: any = await Promise.all([
-                fetch(`${this.configs.relayURL}/request/${this.props.match.params.userId}`),
-                fetch(`${this.configs.relayURL}/setting/${this.props.match.params.userId}`)
+                fetch(`${this.configs.relayURL}/request/${user.userId}`),
+                fetch(`${this.configs.relayURL}/setting/${user.userId}`),
             ]);
 
             let requests = (await promises[0].json()).requests;
@@ -79,7 +82,7 @@ export default class Purchase extends React.Component {
                 }
             });
         } catch (e) {
-            this.toast.show({html: '<i class="material-icons">done</i>Error loading requests', classes: 'error'});
+            this.toast.show({html: '<i class="material-icons">error_outline</i>No requests found', classes: 'error'});
         }
     }
 

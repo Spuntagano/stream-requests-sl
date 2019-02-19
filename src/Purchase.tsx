@@ -8,7 +8,7 @@ import 'materialize-loader';
 ReactDOM.render((
     <HashRouter>
         <Switch>
-            <Route exact path="/:userId" component={Purchase} />
+            <Route exact path="/:displayName" component={Purchase} />
         </Switch>
     </HashRouter>
 ), document.getElementById('root'));

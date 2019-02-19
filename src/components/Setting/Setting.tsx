@@ -74,7 +74,7 @@ export default class Setting extends React.Component {
         this.setState((prevState: State) => {
             let newRequests: Array<Request> = [...prevState.requests];
             if (newRequests[newRequests.length-1][update].length) {
-                newRequests.push({title: '', description: '', active: false, price: ''});
+                newRequests.push({title: '', description: '', active: true, price: ''});
             }
 
             if (!newRequests[index].description.length && !newRequests[index].title.length && value.length) {
@@ -109,7 +109,7 @@ export default class Setting extends React.Component {
         const {configs, authentication} = this.props;
 
         if (!this.state.settings.paypalEmail) {
-            this.toast.show({html: '<i class="material-icons">done</i>Please enter your paypal email', classes: 'error'});
+            this.toast.show({html: '<i class="material-icons">error_outline</i>Please enter your paypal email', classes: 'error'});
             return;
         }
 
@@ -122,7 +122,7 @@ export default class Setting extends React.Component {
 
             this.toast.show({html: '<i class="material-icons">done</i>Configurations saved!', classes: 'success'});
         } catch(e) {
-            this.toast.show({html: '<i class="material-icons">done</i>Error saving configurations', classes: 'error'});
+            this.toast.show({html: '<i class="material-icons">error_outline</i>Error saving configurations', classes: 'error'});
         }
     }
 
@@ -145,7 +145,7 @@ export default class Setting extends React.Component {
 
             this.toast.show({html: '<i class="material-icons">done</i>Requests saved!', classes: 'success'});
         } catch(e) {
-            this.toast.show({html: '<i class="material-icons">done</i>Error saving configurations', classes: 'error'});
+            this.toast.show({html: '<i class="material-icons">error_outline</i>Error saving configurations', classes: 'error'});
         }
     }
 
@@ -179,7 +179,7 @@ export default class Setting extends React.Component {
         let target = e.target;
         this.setState((prevState: State) => {
             let newRequests: Array<Request> = [...prevState.requests];
-            newRequests[index].tab = target.checked;
+            newRequests[index].active = target.checked;
             return {requests: newRequests};
         });
     }
@@ -194,8 +194,6 @@ export default class Setting extends React.Component {
 
     render() {
         const {configs, authentication, sourceLoaded} = this.props;
-
-        console.log(sourceLoaded);
 
         return (
             <div className="setting">
