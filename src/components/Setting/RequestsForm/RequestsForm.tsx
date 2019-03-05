@@ -44,15 +44,18 @@ export default class RequestsForm extends React.Component {
     }
 
     render() {
-        const {onUpdateRequests} = this.props;
+        const {onUpdateRequests, requests} = this.props;
 
         return (
             <div className="requests-form">
+                <p className="instruction">Add the requests you wish to be made available.</p>
+
                 {this.renderForm()}
 
                 <div>
-                    <button className="btn waves-effect waves-light" onClick={onUpdateRequests()}>Save requests</button>
+                    <button disabled={requests.length <= 1} className="btn waves-effect waves-light" onClick={onUpdateRequests()}>Save requests</button>
                 </div>
+                {requests.length <= 1 && <p className="warning">* Enter at least one request</p>}
             </div>
         )
     }

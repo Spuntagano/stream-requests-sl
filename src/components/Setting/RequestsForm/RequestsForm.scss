@@ -1,5 +1,16 @@
+@import '../../../sass/global.scss';
+
 .requests-form {
   margin: 0 30px 40px 30px;
+
+  .instruction {
+    margin: -10px 0 20px 0;
+  }
+
+  .warning {
+    color: $secondary-color;
+    font-weight: bold;
+  }
 
   .request-form {
     width: calc(100% - 5rem);

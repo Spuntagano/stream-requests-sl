@@ -73,14 +73,13 @@ export default class Options extends React.Component {
         this.toast.show({html: '<i class="material-icons">done</i>Notification URL copied!', classes: 'success'});
     }
 
-
     render() {
         const {configs, settings, authentication, onUpdateOptions, onUpdateSettings, onPaypalEmailChange} = this.props;
 
         return (
             <div className="options">
               <div className="notification-box">
-                <InputField className="notification-box-url" type="email" inputRef={(el) => this.notificationBoxUrl = el} value={`${configs.purchaseURL}/#/${authentication.getStreamlabs().profiles.streamlabs.name}`} label="This is the link to make requests to your channel" id="notification-box-url" readOnly />
+                <InputField className="notification-box-url" type="email" inputRef={(el) => this.notificationBoxUrl = el} value={`${configs.purchaseURL}/#/${authentication.getStreamlabs().profiles.streamlabs.name}`} label="Link to your requests page" id="notification-box-url" readOnly />
 
                 <a className="copy-notification-box-url" onClick={this.onCopyNotificationBoxUrl()}><i className="material-icons">insert_link</i> Copy link</a>
                 <button className="btn waves-effect waves-light" onClick={this.onTestNotifier()}>Test notification</button>
@@ -92,11 +91,12 @@ export default class Options extends React.Component {
                 <Switch checked={settings.profanityFilter} label="Profanity filter" onChange={onUpdateSettings('profanityFilter')}/>
               </div>
 
-              <InputField className="paypal-email" value={settings.paypalEmail} label="Your paypal email" id="paypal-email" onChange={onPaypalEmailChange()} />
+              <InputField type="email" className="paypal-email" value={settings.paypalEmail} label="Your paypal email" id="paypal-email" onChange={onPaypalEmailChange()} />
 
               <div>
-                <button className="btn waves-effect waves-light" onClick={onUpdateOptions()}>Save settings</button>
+                <button disabled={!settings.paypalEmail} className="btn waves-effect waves-light" onClick={onUpdateOptions()}>Save settings</button>
               </div>
+              {!settings.paypalEmail && <p className="warning">* Enter your Paypal Email address</p>}
             </div>
         )
     }

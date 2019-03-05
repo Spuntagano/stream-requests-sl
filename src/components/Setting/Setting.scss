@@ -30,6 +30,21 @@
           border-bottom: 1px solid $dark-text !important;
         }
 
+        &.notif {
+          &:before {
+            display: block;
+            content: '';
+            width: 5px;
+            height: 5px;
+            background-color: $secondary-color;
+            border-radius: 50%;
+            float: left;
+            position: relative;
+            top: 8px;
+            margin-right: 10px;
+          }
+        }
+
         &:hover {
           color: $dark-text;
           border-bottom: 1px solid $dark-text !important;

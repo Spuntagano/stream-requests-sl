@@ -74,19 +74,19 @@ export default class Setting extends React.Component {
         this.setState((prevState: State) => {
             let newRequests: Array<Request> = [...prevState.requests];
             if (newRequests[newRequests.length-1][update].length) {
-                newRequests.push({title: '', description: '', active: true, price: ''});
+                newRequests.push({title: '', description: '', active: false, price: ''});
             }
 
             if (!newRequests[index].description.length && !newRequests[index].title.length && value.length) {
-                newRequests[index].tab = true;
+                newRequests[index].active = true;
             }
 
             if (update === 'title' && !newRequests[index].description.length && !value.length) {
-                newRequests[index].tab = false;
+                newRequests[index].active = false;
             }
 
             if (update === 'description' && !newRequests[index].title.length && !value.length) {
-                newRequests[index].tab = false;
+                newRequests[index].active = false;
             }
 
             newRequests[index][update] = value;
@@ -107,11 +107,6 @@ export default class Setting extends React.Component {
 
     async updateOptions() {
         const {configs, authentication} = this.props;
-
-        if (!this.state.settings.paypalEmail) {
-            this.toast.show({html: '<i class="material-icons">error_outline</i>Please enter your paypal email', classes: 'error'});
-            return;
-        }
 
         const displayName = authentication.getStreamlabs().profiles.streamlabs.name;
 
@@ -199,9 +194,9 @@ export default class Setting extends React.Component {
             <div className="setting">
                 <header>
                     <ul className="clearfix">
-                        <li className={(this.state.tab === 'options') ? 'menu active' : 'menu'} onClick={this.onSetTab('options')}>Settings</li>
-                        <li className={(this.state.tab === 'requests') ? 'menu active' : 'menu'} onClick={this.onSetTab('requests')}>Requests</li>
-                        <li className={(this.state.tab === 'feed') ? 'menu active' : 'menu'} onClick={this.onSetTab('feed')}>Feed</li>
+                        <li className={`${(this.state.tab === 'options') ? 'active' : ''} ${(!this.state.settings.paypalEmail) ? 'notif' : ''} menu`} onClick={this.onSetTab('options')}>Settings</li>
+                        <li className={`${(this.state.tab === 'requests') ? 'active' : ''} ${(this.state.requests.length <= 1) ? 'notif' : ''} menu`} onClick={this.onSetTab('requests')}>Requests</li>
+                        <li className={`${(this.state.tab === 'feed') ? 'active' : ''} menu`} onClick={this.onSetTab('feed')}>Feed</li>
                         {sourceLoaded && <li className="in source">Source in current scene</li>}
                         {!sourceLoaded && <li className="out source">Source not in current scene</li>}
                     </ul>

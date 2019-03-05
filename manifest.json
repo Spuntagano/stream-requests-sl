@@ -10,7 +10,13 @@
       "name": "Stream Requests",
       "id": "stream_requests",
       "about": {
-        "description": "Source for the notifications to appear on stream."
+        "description": "Display incoming request alerts on your stream",
+        "bullets": [
+          "Incentivize viewers to use the app",
+          "Make you stream more interactive",
+          "Increase monetization"
+        ],
+        "bannerImage": "banner.png"
       },
       "file": "widget.html",
       "initialSize": {

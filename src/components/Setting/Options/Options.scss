@@ -1,5 +1,12 @@
+@import '../../../sass/global.scss';
+
 .options {
   margin: 0 30px 40px 30px;
+
+  .warning {
+    color: $secondary-color;
+    font-weight: bold;
+  }
 
   .notifications {
     .label {

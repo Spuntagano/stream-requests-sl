@@ -153,43 +153,54 @@ export default class Purchase extends React.Component {
         const {match} = this.props;
 
         return (
-            <div className="app night-theme">
+            <div className="app">
                 <div className="purchase">
                     <h2>Stream Requests</h2>
-                    <p>Stream request is a new way to interact with the streamer. It allows viewers to pay for requests listed below.</p>
-                    <Collection title="Requests">
-                        <div className={`request-container ${this.state.showInfo ? 'show-info' : ''}`}>
-                            {this.renderCollectionItems()}
-                            <div className={`scale-transition ${this.state.showInfo ? 'scale-in' : 'scale-out'}`}>
-                                {this.state.showInfo && <Card
-                                  title={this.state.requests[this.state.index].title}
-                                  subtitle={`${this.state.requests[this.state.index].price.toFixed(2)}$`}
-                                  onClose={this.onShowRequests()}
-                                  className="fullscreen"
-                                  mainAction={{
-                                      text: 'Request',
-                                      onClick: () => {this.form.submit()}
-                                  }}
-                                >
-                                  <p className="description">{this.state.requests[this.state.index].description}</p>
-                                  <form ref={el => this.form = el} action={this.configs.ipnURL} method="post">
-                                    <input type="hidden" name="business" value={this.state.settings.paypalEmail} />
-                                    <input type="hidden" name="cmd" value="_xclick" />
-                                    <input type="hidden" name="notify_url" value={`${this.configs.relayURL}/paypal-ipn`} />
-                                    <input type="hidden" name="item_name" value={this.state.requests[this.state.index].title} />
-                                    <input type="hidden" name="custom" value={JSON.stringify({message: this.state.message, userId: match.params.userId, displayName: this.state.name, index: this.state.index})} />
-                                    <input type="hidden" name="amount" value={this.state.requests[this.state.index].price} />
-                                    <input type="hidden" name="currency_code" value="USD" />
-                                    <input type="hidden" name="no_shipping" value="1" />
-                                    <input type="hidden" name="return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
-                                    <input type="hidden" name="cancel_return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
-                                  </form>
-                                  <InputField value={this.state.name} label="Username" id="request-name" maxLength={20} onChange={this.onNameChange()} />
-                                  <Textarea value={this.state.message} label="Message" id="request-message" maxLength={150} onChange={this.onMessageChange()} />
-                                </Card>}
-                            </div>
+                    <div className="container clearfix">
+                        <div className="col-12">
+                            <h6>Submit a request to {this.props.match.params.displayName}</h6>
                         </div>
-                    </Collection>
+                        <div className="col-6">
+                            <input type="text" className="browser-default" value={this.state.name} placeholder="Username" maxLength={20} onChange={this.onNameChange()} />
+                            <textarea value={this.state.message} placeholder="Message" maxLength={150} onChange={this.onMessageChange()} />
+                        </div>
+                        <div className="col-6">
+                            <Collection>
+                                <div className={`request-container ${this.state.showInfo ? 'show-info' : ''}`}>
+                                    {this.renderCollectionItems()}
+                                    <div className={`scale-transition ${this.state.showInfo ? 'scale-in' : 'scale-out'}`}>
+                                        {this.state.showInfo && <Card
+                                        title={this.state.requests[this.state.index].title}
+                                        subtitle={`${this.state.requests[this.state.index].price.toFixed(2)}$`}
+                                        onClose={this.onShowRequests()}
+                                        className="fullscreen"
+                                        mainAction={{
+                                            text: 'Request',
+                                            onClick: () => {this.form.submit()}
+                                        }}
+                                        >
+                                        <p className="description">{this.state.requests[this.state.index].description}</p>
+                                        <form ref={el => this.form = el} action={this.configs.ipnURL} method="post">
+                                            <input type="hidden" name="business" value={this.state.settings.paypalEmail} />
+                                            <input type="hidden" name="cmd" value="_xclick" />
+                                            <input type="hidden" name="notify_url" value={`${this.configs.relayURL}/paypal-ipn`} />
+                                            <input type="hidden" name="item_name" value={this.state.requests[this.state.index].title} />
+                                            <input type="hidden" name="custom" value={JSON.stringify({message: this.state.message, userId: match.params.userId, displayName: this.state.name, index: this.state.index})} />
+                                            <input type="hidden" name="amount" value={this.state.requests[this.state.index].price} />
+                                            <input type="hidden" name="currency_code" value="USD" />
+                                            <input type="hidden" name="no_shipping" value="1" />
+                                            <input type="hidden" name="return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
+                                            <input type="hidden" name="cancel_return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
+                                        </form>
+                                        </Card>}
+                                    </div>
+                                </div>
+                            </Collection>
+                        </div>
+                        <div className="col-12">
+                            <p className="info">Stream request is a new way to interact with the streamer, it allows viewers to pay for requests listed above. Just enter your username, your message, and select the one you want. An alert will then show up on stream and the broadcaster will execute the request.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         )

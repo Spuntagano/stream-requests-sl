@@ -1,8 +1,8 @@
 const configs:any = {
     testing: {
-        relayURL: 'https://docker.dev:3002',
-        ipnURL: 'https://docker.dev:3002/paypal-ipn',
-        wsURL: 'wss://docker.dev:3004',
+        relayURL: 'https://localhost:3002',
+        ipnURL: 'https://localhost:3002/paypal-ipn',
+        wsURL: 'wss://localhost:3004',
         returnURL: 'http://localhost:8080/purchase.html',
         cdnBasePath: '',
         purchaseURL: 'http://localhost:8080/purchase.html'
