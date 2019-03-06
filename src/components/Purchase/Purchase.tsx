@@ -185,12 +185,12 @@ export default class Purchase extends React.Component {
                                             <input type="hidden" name="cmd" value="_xclick" />
                                             <input type="hidden" name="notify_url" value={`${this.configs.relayURL}/paypal-ipn`} />
                                             <input type="hidden" name="item_name" value={this.state.requests[this.state.index].title} />
-                                            <input type="hidden" name="custom" value={JSON.stringify({message: this.state.message, userId: match.params.userId, displayName: this.state.name, index: this.state.index})} />
+                                            <input type="hidden" name="custom" value={JSON.stringify({message: this.state.message, userId: this.state.settings.userId, displayName: this.state.name, index: this.state.index})} />
                                             <input type="hidden" name="amount" value={this.state.requests[this.state.index].price} />
                                             <input type="hidden" name="currency_code" value="USD" />
                                             <input type="hidden" name="no_shipping" value="1" />
-                                            <input type="hidden" name="return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
-                                            <input type="hidden" name="cancel_return" value={`${this.configs.returnURL}#/${match.params.userId}`} />
+                                            <input type="hidden" name="return" value={`${this.configs.returnURL}#/${match.params.displayName}`} />
+                                            <input type="hidden" name="cancel_return" value={`${this.configs.returnURL}#/${match.params.displayName}`} />
                                         </form>
                                         </Card>}
                                     </div>
