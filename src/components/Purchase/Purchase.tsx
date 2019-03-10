@@ -37,6 +37,7 @@ export default class Purchase extends React.Component {
     public onShowRequests: () => () => void;
     public onMessageChange: () => (e: ChangeEvent<HTMLTextAreaElement>) => void;
     public onNameChange: () => (e: ChangeEvent<HTMLInputElement>) => void;
+    public onSubmitRequest: () => () => void;
 
     constructor(props: Props) {
         super(props);
@@ -47,6 +48,7 @@ export default class Purchase extends React.Component {
         this.onShowRequests = () => () => this.showRequests();
         this.onMessageChange = () => (e: ChangeEvent<HTMLTextAreaElement>) => this.messageChange(e);
         this.onNameChange = () => (e: ChangeEvent<HTMLInputElement>) => this.nameChange(e);
+        this.onSubmitRequest = () => () => this.submitRequest();
 
         const url = new URL(window.location.href);
         const state = url.searchParams.get('state') || 'released';
@@ -149,6 +151,15 @@ export default class Purchase extends React.Component {
         return items;
     }
 
+    submitRequest() {
+        if (!this.state.name) {
+            this.toast.show({html: '<i class="material-icons">error_outline</i>Please enter your username', classes: 'error'});
+            return;
+        }
+
+        this.form.submit();
+    }
+
     render() {
         const {match} = this.props;
 
@@ -176,7 +187,7 @@ export default class Purchase extends React.Component {
                                         className="fullscreen"
                                         mainAction={{
                                             text: 'Request',
-                                            onClick: () => {this.form.submit()}
+                                            onClick: this.onSubmitRequest()
                                         }}
                                         >
                                         <p className="description">{this.state.requests[this.state.index].description}</p>
