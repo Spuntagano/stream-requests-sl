@@ -1,6 +1,6 @@
 {
   "name": "Stream Requests",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "buildPath": "dist/",
   "supportedPlatforms": ["twitch", "youtube", "facebook", "mixer"],
   "permissions": ["slobs.scenes-sources"],
